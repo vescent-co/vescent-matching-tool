@@ -1,0 +1,17 @@
+# Real teen and mentor data must never be saved in this repo.
+# The tool reads files on the user's own computer; this only stops them being published.
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.numbers
+*.json
+# The only data files allowed: made-up test data and the app's question list.
+!test-data/test-teens-export.csv
+!test-data/test-mentors.csv
+!test-data/onboarding_questions_2026-09-v2.json
+
+# Internal decisions stay private (option B, October 6, 2026).
+docs/
+
+.DS_Store

@@ -1,0 +1,675 @@
+{
+  "questions": [
+    {
+      "id": "personality_01",
+      "flowOrder": 1,
+      "section": "Energy",
+      "questionType": "single_choice",
+      "prompt": "After a long day at school, what sounds better?",
+      "options": [
+        {
+          "id": "being_around_lots_of_people",
+          "label": "Being around lots of people"
+        },
+        {
+          "id": "chilling_alone_or_with_a_few_close_friends",
+          "label": "Chilling alone or with a few close friends"
+        }
+      ]
+    },
+    {
+      "id": "personality_02",
+      "flowOrder": 2,
+      "section": "Energy",
+      "questionType": "single_choice",
+      "prompt": "When you're stressed, what helps more?",
+      "options": [
+        {
+          "id": "venting_to_a_friend_or_being_around_people",
+          "label": "Venting to a friend or being around people"
+        },
+        {
+          "id": "taking_space_to_process_on_your_own",
+          "label": "Taking space to process on your own"
+        }
+      ]
+    },
+    {
+      "id": "personality_03",
+      "flowOrder": 3,
+      "section": "Energy",
+      "questionType": "single_choice",
+      "prompt": "At a party or group hangout, you're more likely to...",
+      "options": [
+        {
+          "id": "talk_to_lots_of_different_people",
+          "label": "Talk to lots of different people"
+        },
+        {
+          "id": "stick_with_one_or_two_you_know",
+          "label": "Stick with one or two you know"
+        }
+      ]
+    },
+    {
+      "id": "personality_04",
+      "flowOrder": 4,
+      "section": "How You Take Things In",
+      "questionType": "single_choice",
+      "prompt": "When someone gives you directions, what works better?",
+      "options": [
+        {
+          "id": "step_by_step_details",
+          "label": "Step-by-step details"
+        },
+        {
+          "id": "the_general_idea_i_ll_figure_it_out",
+          "label": "The general idea - I'll figure it out"
+        }
+      ]
+    },
+    {
+      "id": "personality_05",
+      "flowOrder": 5,
+      "section": "How You Take Things In",
+      "questionType": "single_choice",
+      "prompt": "You're more drawn to...",
+      "options": [
+        {
+          "id": "what_s_real_and_happening_now",
+          "label": "What's real and happening now"
+        },
+        {
+          "id": "ideas_and_what_could_be",
+          "label": "Ideas and what could be"
+        }
+      ]
+    },
+    {
+      "id": "personality_06",
+      "flowOrder": 6,
+      "section": "How You Take Things In",
+      "questionType": "single_choice",
+      "prompt": "Learning something new, you focus on...",
+      "options": [
+        {
+          "id": "the_facts_and_how_it_works",
+          "label": "The facts and how it works"
+        },
+        {
+          "id": "the_big_picture_and_what_it_means",
+          "label": "The big picture and what it means"
+        }
+      ]
+    },
+    {
+      "id": "personality_07",
+      "flowOrder": 7,
+      "section": "How You Decide",
+      "questionType": "single_choice",
+      "prompt": "When a friend has a problem, you first...",
+      "options": [
+        {
+          "id": "help_them_solve_it",
+          "label": "Help them solve it"
+        },
+        {
+          "id": "make_sure_they_feel_heard",
+          "label": "Make sure they feel heard"
+        }
+      ]
+    },
+    {
+      "id": "personality_08",
+      "flowOrder": 8,
+      "section": "How You Decide",
+      "questionType": "single_choice",
+      "prompt": "Making a tough choice, you go with...",
+      "options": [
+        {
+          "id": "what_makes_the_most_sense",
+          "label": "What makes the most sense"
+        },
+        {
+          "id": "what_feels_right",
+          "label": "What feels right"
+        }
+      ]
+    },
+    {
+      "id": "personality_09",
+      "flowOrder": 9,
+      "section": "How You Decide",
+      "questionType": "single_choice",
+      "prompt": "You'd rather be seen as...",
+      "options": [
+        {
+          "id": "fair",
+          "label": "Fair"
+        },
+        {
+          "id": "kind",
+          "label": "Kind"
+        }
+      ]
+    },
+    {
+      "id": "personality_10",
+      "flowOrder": 10,
+      "section": "How You Live",
+      "questionType": "single_choice",
+      "prompt": "Your weekend is better when...",
+      "options": [
+        {
+          "id": "you_have_a_plan",
+          "label": "You have a plan"
+        },
+        {
+          "id": "you_keep_it_open",
+          "label": "You keep it open"
+        }
+      ]
+    },
+    {
+      "id": "personality_11",
+      "flowOrder": 11,
+      "section": "How You Live",
+      "questionType": "single_choice",
+      "prompt": "With homework, you...",
+      "options": [
+        {
+          "id": "start_early_and_go_steady",
+          "label": "Start early and go steady"
+        },
+        {
+          "id": "do_it_when_the_pressure_hits",
+          "label": "Do it when the pressure hits"
+        }
+      ]
+    },
+    {
+      "id": "personality_12",
+      "flowOrder": 12,
+      "section": "How You Live",
+      "questionType": "single_choice",
+      "prompt": "You feel better when things are...",
+      "options": [
+        {
+          "id": "decided_and_settled",
+          "label": "Decided and settled"
+        },
+        {
+          "id": "open_to_change",
+          "label": "Open to change"
+        }
+      ]
+    },
+    {
+      "id": "personality_13",
+      "flowOrder": 13,
+      "section": "Energy",
+      "questionType": "single_choice",
+      "prompt": "You get your energy from...",
+      "options": [
+        {
+          "id": "being_with_other_people",
+          "label": "Being with other people"
+        },
+        {
+          "id": "time_to_yourself",
+          "label": "Time to yourself"
+        }
+      ]
+    },
+    {
+      "id": "personality_14",
+      "flowOrder": 14,
+      "section": "Energy",
+      "questionType": "single_choice",
+      "prompt": "In a group project you'd rather...",
+      "options": [
+        {
+          "id": "talk_it_all_out_together",
+          "label": "Talk it all out together"
+        },
+        {
+          "id": "take_a_piece_and_work_on_it_solo",
+          "label": "Take a piece and work on it solo"
+        }
+      ]
+    },
+    {
+      "id": "personality_15",
+      "flowOrder": 15,
+      "section": "How You Take Things In",
+      "questionType": "single_choice",
+      "prompt": "You tend to trust...",
+      "options": [
+        {
+          "id": "what_you_can_see_and_prove",
+          "label": "What you can see and prove"
+        },
+        {
+          "id": "your_gut_and_your_hunches",
+          "label": "Your gut and your hunches"
+        }
+      ]
+    },
+    {
+      "id": "personality_16",
+      "flowOrder": 16,
+      "section": "How You Take Things In",
+      "questionType": "single_choice",
+      "prompt": "You'd rather a teacher who...",
+      "options": [
+        {
+          "id": "gives_clear_examples_to_follow",
+          "label": "Gives clear examples to follow"
+        },
+        {
+          "id": "lets_you_explore_your_own_ideas",
+          "label": "Lets you explore your own ideas"
+        }
+      ]
+    },
+    {
+      "id": "personality_17",
+      "flowOrder": 17,
+      "section": "How You Decide",
+      "questionType": "single_choice",
+      "prompt": "When someone's upset with you, you first want to...",
+      "options": [
+        {
+          "id": "understand_what_s_fair",
+          "label": "Understand what's fair"
+        },
+        {
+          "id": "fix_how_they_re_feeling",
+          "label": "Fix how they're feeling"
+        }
+      ]
+    },
+    {
+      "id": "personality_18",
+      "flowOrder": 18,
+      "section": "How You Decide",
+      "questionType": "single_choice",
+      "prompt": "A good decision is one that's...",
+      "options": [
+        {
+          "id": "logical",
+          "label": "Logical"
+        },
+        {
+          "id": "true_to_your_heart",
+          "label": "True to your heart"
+        }
+      ]
+    },
+    {
+      "id": "personality_19",
+      "flowOrder": 19,
+      "section": "How You Live",
+      "questionType": "single_choice",
+      "prompt": "Your room or backpack is usually...",
+      "options": [
+        {
+          "id": "pretty_organized",
+          "label": "Pretty organized"
+        },
+        {
+          "id": "a_bit_of_controlled_chaos",
+          "label": "A bit of controlled chaos"
+        }
+      ]
+    },
+    {
+      "id": "personality_20",
+      "flowOrder": 20,
+      "section": "How You Live",
+      "questionType": "single_choice",
+      "prompt": "Plans changing last minute feels...",
+      "options": [
+        {
+          "id": "kind_of_stressful",
+          "label": "Kind of stressful"
+        },
+        {
+          "id": "kind_of_exciting",
+          "label": "Kind of exciting"
+        }
+      ]
+    },
+    {
+      "id": "lightning_01",
+      "flowOrder": 21,
+      "section": "Lightning Round",
+      "questionType": "single_choice",
+      "prompt": "Don't think - just tap",
+      "options": [
+        {
+          "id": "making_a_playlist",
+          "label": "Making a playlist"
+        },
+        {
+          "id": "making_a_mess_in_the_kitchen",
+          "label": "Making a mess in the kitchen"
+        }
+      ]
+    },
+    {
+      "id": "lightning_02",
+      "flowOrder": 22,
+      "section": "Lightning Round",
+      "questionType": "single_choice",
+      "prompt": "Don't think - just tap",
+      "options": [
+        {
+          "id": "big_group_hangout",
+          "label": "Big group hangout"
+        },
+        {
+          "id": "one_close_friend",
+          "label": "One close friend"
+        }
+      ]
+    },
+    {
+      "id": "lightning_03",
+      "flowOrder": 23,
+      "section": "Lightning Round",
+      "questionType": "single_choice",
+      "prompt": "Don't think - just tap",
+      "options": [
+        {
+          "id": "texting",
+          "label": "Texting"
+        },
+        {
+          "id": "calling",
+          "label": "Calling"
+        }
+      ]
+    },
+    {
+      "id": "lightning_04",
+      "flowOrder": 24,
+      "section": "Lightning Round",
+      "questionType": "single_choice",
+      "prompt": "Don't think - just tap",
+      "options": [
+        {
+          "id": "early_bird",
+          "label": "Early bird"
+        },
+        {
+          "id": "night_owl",
+          "label": "Night owl"
+        }
+      ]
+    },
+    {
+      "id": "lightning_05",
+      "flowOrder": 25,
+      "section": "Lightning Round",
+      "questionType": "single_choice",
+      "prompt": "Don't think - just tap",
+      "options": [
+        {
+          "id": "beach_day",
+          "label": "Beach day"
+        },
+        {
+          "id": "mountain_trip",
+          "label": "Mountain trip"
+        }
+      ]
+    },
+    {
+      "id": "lightning_06",
+      "flowOrder": 26,
+      "section": "Lightning Round",
+      "questionType": "single_choice",
+      "prompt": "Don't think - just tap",
+      "options": [
+        {
+          "id": "rom_com",
+          "label": "Rom-com"
+        },
+        {
+          "id": "true_crime",
+          "label": "True crime"
+        }
+      ]
+    },
+    {
+      "id": "lightning_07",
+      "flowOrder": 27,
+      "section": "Lightning Round",
+      "questionType": "single_choice",
+      "prompt": "Don't think - just tap",
+      "options": [
+        {
+          "id": "stick_to_a_plan",
+          "label": "Stick to a plan"
+        },
+        {
+          "id": "go_with_the_flow",
+          "label": "Go with the flow"
+        }
+      ]
+    },
+    {
+      "id": "lightning_08",
+      "flowOrder": 28,
+      "section": "Lightning Round",
+      "questionType": "single_choice",
+      "prompt": "Don't think - just tap",
+      "options": [
+        {
+          "id": "sweet",
+          "label": "Sweet"
+        },
+        {
+          "id": "salty",
+          "label": "Salty"
+        }
+      ]
+    },
+    {
+      "id": "interests",
+      "flowOrder": 29,
+      "section": "Interests",
+      "questionType": "tag_select",
+      "prompt": "What fills your time?",
+      "options": [
+        {
+          "id": "drawing_art",
+          "label": "drawing + art"
+        },
+        {
+          "id": "sports_moving",
+          "label": "sports + moving"
+        },
+        {
+          "id": "music",
+          "label": "music"
+        },
+        {
+          "id": "gaming",
+          "label": "gaming"
+        },
+        {
+          "id": "reading_writing",
+          "label": "reading + writing"
+        },
+        {
+          "id": "animals",
+          "label": "animals"
+        },
+        {
+          "id": "baking_cooking",
+          "label": "baking + cooking"
+        },
+        {
+          "id": "fashion_thrifting",
+          "label": "fashion + thrifting"
+        },
+        {
+          "id": "being_outside",
+          "label": "being outside"
+        },
+        {
+          "id": "faith_community",
+          "label": "faith + community"
+        },
+        {
+          "id": "shows_movies",
+          "label": "shows + movies"
+        }
+      ]
+    },
+    {
+      "id": "interests_other",
+      "flowOrder": 30,
+      "section": "Interests",
+      "questionType": "open_response",
+      "prompt": "What else fills your time?",
+      "options": [
+
+      ]
+    },
+    {
+      "id": "reply_pace",
+      "flowOrder": 31,
+      "section": "Reply Pace",
+      "questionType": "single_choice",
+      "prompt": "When a friend texts you, you usually reply...",
+      "options": [
+        {
+          "id": "pretty_fast_i_like_keeping_it_going",
+          "label": "Pretty fast - I like keeping it going"
+        },
+        {
+          "id": "when_i_see_it_could_be_an_hour_or_tonight",
+          "label": "When I see it - could be an hour or tonight"
+        },
+        {
+          "id": "when_i_have_the_energy_sometimes_a_day",
+          "label": "When I have the energy - sometimes a day"
+        }
+      ]
+    },
+    {
+      "id": "current_state",
+      "flowOrder": 32,
+      "section": "4H Journey",
+      "questionType": "single_choice",
+      "prompt": "How are things, honestly?",
+      "options": [
+        {
+          "id": "pretty_good_i_want_someone_in_my_corner",
+          "label": "Pretty good - I want someone in my corner"
+        },
+        {
+          "id": "up_and_down_lately",
+          "label": "Up and down lately"
+        },
+        {
+          "id": "it_s_been_hard_for_a_while",
+          "label": "It's been hard for a while"
+        }
+      ]
+    },
+    {
+      "id": "growth_goals",
+      "flowOrder": 33,
+      "section": "4H Journey",
+      "questionType": "tag_select",
+      "prompt": "Anything you're hoping to grow, figure out, or get better at?",
+      "options": [
+        {
+          "id": "feeling_less_alone",
+          "label": "feeling less alone"
+        },
+        {
+          "id": "confidence",
+          "label": "confidence"
+        },
+        {
+          "id": "less_stress",
+          "label": "less stress"
+        },
+        {
+          "id": "my_future",
+          "label": "my future"
+        },
+        {
+          "id": "friend_stuff",
+          "label": "friend stuff"
+        }
+      ]
+    },
+    {
+      "id": "growth_goals_other",
+      "flowOrder": 34,
+      "section": "4H Journey",
+      "questionType": "open_response",
+      "prompt": "What else are you hoping to grow, figure out, or get better at?",
+      "options": []
+    },
+    {
+      "id": "lived_experience",
+      "flowOrder": 35,
+      "section": "Lived Experience",
+      "questionType": "tag_select",
+      "prompt": "Want a mentor who's been through it too?",
+      "options": [
+        {
+          "id": "switching_schools",
+          "label": "switching schools"
+        },
+        {
+          "id": "parents_splitting_up",
+          "label": "parents splitting up"
+        },
+        {
+          "id": "anxiety",
+          "label": "anxiety"
+        },
+        {
+          "id": "losing_someone",
+          "label": "losing someone"
+        },
+        {
+          "id": "feeling_left_out",
+          "label": "feeling left out"
+        },
+        {
+          "id": "body_image",
+          "label": "body image"
+        },
+        {
+          "id": "family_stress",
+          "label": "family stress"
+        },
+        {
+          "id": "other",
+          "label": "+ other"
+        },
+        {
+          "id": "none_of_these",
+          "label": "none of these"
+        }
+      ]
+    },
+    {
+      "id": "lived_experience_other",
+      "flowOrder": 36,
+      "section": "Lived Experience",
+      "questionType": "open_response",
+      "prompt": "Anything else you want our team to know?",
+      "options": []
+    }
+  ]
+}
