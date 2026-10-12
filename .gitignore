@@ -9,6 +9,7 @@
 # The only data files allowed: made-up test data and the app's question list.
 !test-data/test-teens-export.csv
 !test-data/test-mentors.csv
+!test-data/test-mentor-form.csv
 !test-data/onboarding_questions_2026-09-v2.json
 
 # Internal decisions stay private (option B, October 6, 2026).

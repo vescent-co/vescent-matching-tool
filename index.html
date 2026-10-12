@@ -82,7 +82,7 @@
 
   <div class="panel">
     <h2>2. Open the mentor answers</h2>
-    <p>Choose the mentor file. Until mentors take the survey in the app, this is the file from our mentor form.</p>
+    <p>Choose the CSV downloaded from the mentor response sheet, or an admin mentor export. If a mentor submits more than once with the same email, the newest answers are used and a notice appears below.</p>
     <label class="file">Choose mentor file<input type="file" id="mentorFile" accept=".csv,text/csv"></label>
     <span class="filename" id="mentorFileName"></span>
     <div id="mentorNotices"></div>
@@ -116,6 +116,79 @@ const COL = {
   lived: "Want a mentor who's been through it too?",
   note: "Anything else you want our team to know?",
 };
+// The existing Google mentor form uses five mentor-worded questions and two alternate answers.
+const FORM_PERSONALITY = {
+  "After a long day at school, what sounds better?": "After a long day of classes, what sounds better?",
+  "You'd rather a teacher who...": "You'd rather a professor who...",
+  "With homework, you...": "With coursework, you...",
+  "Your room or backpack is usually...": "Your room or bag is usually...",
+};
+const FORM_COL = {
+  lived: "Sometimes life experiences can be so helpful in a near-peer relationship. Are there any of the following personal experiences in your life that might be relevant for your match?",
+  replyPace: "When a teen messages you, how fast can you reply?",
+};
+
+// Parse the response sheet's month/day/year timestamps explicitly, not by browser locale.
+function responseTime(value) {
+  const m = (value || "").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4}) (\d{1,2}):(\d{2}):(\d{2})(?: (AM|PM))?$/i);
+  if (!m) return null;
+  let [, month, day, year, hour, minute, second, period] = m;
+  [month, day, year, hour, minute, second] = [month, day, year, hour, minute, second].map(Number);
+  if (period) {
+    if (hour < 1 || hour > 12) return null;
+    hour = hour % 12 + (period.toUpperCase() === "PM" ? 12 : 0);
+  }
+  const d = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+  return d.getUTCFullYear() === year && d.getUTCMonth() === month - 1 && d.getUTCDate() === day
+    && d.getUTCHours() === hour && d.getUTCMinutes() === minute && d.getUTCSeconds() === second
+    ? d.getTime() : null;
+}
+
+function formMentors(records, notices) {
+  const groups = new Map();
+  records.forEach((rec, i) => {
+    const email = (rec.Email || "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      notices.push(["error", "Mentor response row " + (i + 2) + " has a missing or invalid email and is excluded. Check the response sheet."]);
+      return;
+    }
+    if (!groups.has(email)) groups.set(email, []);
+    groups.get(email).push(rec);
+  });
+  const selected = [];
+  for (const [email, rows] of groups) {
+    let rec = rows[0];
+    if (rows.length > 1) {
+      const dated = rows.map(row => ({ row, time: responseTime(row.Timestamp) }));
+      const newest = Math.max(...dated.map(item => item.time ?? -Infinity));
+      const winners = dated.filter(item => item.time === newest);
+      if (dated.some(item => item.time === null) || winners.length !== 1) {
+        notices.push(["error", email + " has duplicate submissions with missing, invalid or tied newest timestamps. This mentor is excluded until the response sheet is checked."]);
+        continue;
+      }
+      rec = winners[0].row;
+      const name = [rec["First name"], rec["Last name"]].filter(Boolean).join(" ") || email;
+      notices.push(["info", name + " (" + email + ") submitted " + rows.length + " times. Using " + rec.Timestamp + " from the response sheet."]);
+    }
+    const normalized = {
+      first_name: rec["First name"], last_name: rec["Last name"], email,
+      [COL.interests]: rec[COL.interests], [COL.interestsOther]: rec[COL.interestsOther],
+      [COL.lived]: rec[FORM_COL.lived], [COL.replyPace]: rec[FORM_COL.replyPace],
+      mentorBio: rec["Tell teens who you are"], mentorHelp: rec["I'm here to help with"],
+      livedOther: rec["Any other experience you'd like to add?"],
+    };
+    for (const [wording] of Object.values(PERSONALITY).flat()) {
+      let answer = rec[FORM_PERSONALITY[wording] || wording];
+      if (wording === "After a long day at school, what sounds better?" && answer === "Chilling alone") answer = "Chilling alone or with a few close friends";
+      if (wording === "When you're stressed, what helps more?" && answer === "Taking space and processing it alone") answer = "Taking space to process on your own";
+      normalized[wording] = answer;
+    }
+    normalized.lightningAnswers = Array.from({ length: 8 }, (_, i) => rec["Lightning round " + (i + 1) + " of 8"]);
+    selected.push(normalized);
+  }
+  return selected;
+}
+
 const HARD = "It's been hard for a while";
 
 // Agreed starting weights, locked October 5, 2026 (docs/scoring-rules.md). Anyone can change them in the
@@ -216,9 +289,23 @@ function personalityType(rec) {
   return problems.length ? { type: null, problems } : { type, problems };
 }
 
-function readPeople(text) {
+function readPeople(text, role = "teen") {
   const { headers, records } = parseCSV(text);
   const notices = [];
+  const isForm = headers.includes("Timestamp") || headers.includes("First name") || headers.includes("Email");
+  if (isForm) {
+    if (role !== "mentor") return { people: [], notices: [["error", "This is a mentor form file. Choose it under mentor answers, not teen answers."]] };
+    const required = ["Timestamp", "First name", "Last name", "Email", COL.interests, FORM_COL.lived,
+      FORM_COL.replyPace, COL.interestsOther, "Any other experience you'd like to add?", "Tell teens who you are", "I'm here to help with"]
+      .concat(Object.values(PERSONALITY).flat().map(([wording]) => FORM_PERSONALITY[wording] || wording))
+      .concat(Array.from({ length: 8 }, (_, i) => "Lightning round " + (i + 1) + " of 8"));
+    const missing = required.filter(h => !headers.includes(h));
+    if (missing.length || new Set(headers).size !== headers.length) return { people: [], notices: [["error",
+      "The mentor form columns have changed or are missing. Check the response sheet before relying on results. Missing: " + missing.join("; ")]] };
+    notices.push(["info", "Mentor form loaded. Lightning answers are retained but not scored while the teen export lacks all eight taps."]);
+    const people = formMentors(records, notices).map(rec => ({ rec, ...personalityType(rec) }));
+    return { people, notices };
+  }
   const missing = ["first_name", "survey_version", COL.interests, COL.lived]
     .concat(Object.values(PERSONALITY).flat().map(q => q[0]))
     .filter(h => !headers.includes(h));
@@ -367,6 +454,10 @@ function renderMentor(p) {
     el("dt", {}, "Other interests"), textOrNone(r[COL.interestsOther], "None"),
     el("dt", {}, "Lived experiences"), listOrNone(picks(r[COL.lived]), "None picked"),
     el("dt", {}, "Reply pace"), textOrNone(r[COL.replyPace], "No answer"),
+    el("dt", {}, "Other lived experiences (not scored)"), textOrNone(r.livedOther, "None"),
+    el("dt", {}, "Bio (not scored)"), textOrNone(r.mentorBio, "No answer in this file"),
+    el("dt", {}, "I'm here to help with (not scored)"), textOrNone(r.mentorHelp, "No answer in this file"),
+    el("dt", {}, "Lightning answers (not scored)"), textOrNone(r.lightningAnswers ? r.lightningAnswers.map((answer, i) => (i + 1) + ": " + (answer || "No answer")).join("; ") : "Not available in this export", "Not available in this export"),
   ));
   return card;
 }
@@ -456,7 +547,7 @@ document.getElementById("mentorFile").addEventListener("change", async (event) =
   if (!file) return;
   document.getElementById("mentorFileName").textContent = file.name;
   try {
-    const { people, notices } = readPeople(await file.text());
+    const { people, notices } = readPeople(await file.text(), "mentor");
     if (!people.length) notices.push(["error", "No mentors found in this file."]);
     // A teen export has "How are things" answers; mentors skip that question.
     if (people.some(p => p.rec[COL.howAreThings])) {
