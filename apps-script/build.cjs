@@ -2,6 +2,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const here = __dirname;
 let html = fs.readFileSync(path.join(here, '..', 'index.html'), 'utf8');
+// The public page links to the staff tool; omit that entry from the staff page itself.
+html = html.replace(/  <!-- STAFF_ENTRY_START -->[\s\S]*?  <!-- STAFF_ENTRY_END -->\n/, '');
 html = html.replace('<head>', '<head>\n<base target="_top">');
 html = html.replace('Files you open here stay on this computer. Nothing is uploaded, sent or saved. Closing or refreshing the page clears everything.', 'Answer files are read temporarily in this browser. When you record a decision, the teen and mentor identities, suggestions and scores, required reason, and status are saved to the private team log in Google Drive. The tool does not assign anyone in the admin portal.');
 html = html.replace('</main>', '<section class="panel" id="matchHistory"><h2>Match decision history</h2><p id="logStatus" role="status" aria-live="polite">Loading private team log…</p><button id="refreshLog" type="button">Refresh history</button><div id="historyRows"></div></section>\n</main>');
