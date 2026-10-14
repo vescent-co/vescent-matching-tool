@@ -16,3 +16,7 @@
 docs/
 
 .DS_Store
+
+# Generated Google-hosted page is rebuilt from the existing tool.
+apps-script/Index.html
+!apps-script/appsscript.json

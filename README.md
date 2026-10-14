@@ -28,3 +28,7 @@ For multiple form responses with the same email (ignoring surrounding spaces and
 ## Run checks
 
 With Node.js available, run `node tests/mentor-form.test.cjs`. Checks use only fictional data and the preserved scoring answer key.
+
+## Private staff match history
+
+`apps-script/` provides a Google-hosted version of this tool with automatically saved match-decision history in a private team Google Sheet. The public page continues to process answer files temporarily without saving them. See `apps-script/README.md` for setup, workflow, and validation status.

@@ -1,0 +1,78 @@
+const fs=require('node:fs');
+const vm=require('node:vm');
+const path=require('node:path');
+const assert=require('node:assert/strict');
+const root=path.resolve(__dirname,'..');
+let email='staff@example.com', locked=false, released=0, failFlush=false;
+const cells=[];
+const sheet={getLastRow:()=>cells.length,getRange:(r,c,n,w)=>({
+ getValues:()=>Array.from({length:n},(_,i)=>Array.from({length:w},(_,j)=>cells[r-1+i]?.[c-1+j]??'')),
+ setValues:values=>{values.forEach((row,i)=>{cells[r-1+i]??=[];row.forEach((v,j)=>{if(typeof v==='string'&&v.startsWith('=')) throw new Error('Formula injection'); cells[r-1+i][c-1+j]=typeof v==='string'&&v.startsWith("'")?v.slice(1):v;});});},
+ setBackground(){return this;},setFontWeight(){return this;},setWrap(){return this;}
+}),setFrozenRows(){},setColumnWidths(){},setColumnWidth(){}};
+const book={getId:()=> 'fictional-sheet',getSheetByName:()=>sheet,insertSheet:()=>sheet};
+const properties={MATCH_LOG_SHEET_ID:'fictional-sheet',MATCH_LOG_ALLOWED_EMAILS:'staff@example.com,second@example.com'};
+const context=vm.createContext({console,PropertiesService:{getScriptProperties:()=>({getProperty:k=>properties[k]})},
+ Session:{getActiveUser:()=>({getEmail:()=>email})},SpreadsheetApp:{openById:id=>{assert.equal(id,'fictional-sheet');return book;},getActiveSpreadsheet:()=>book,flush:()=>{if(failFlush)throw new Error('Response lost after write');}},
+ LockService:{getScriptLock:()=>({waitLock:()=>{assert.equal(locked,false);locked=true;},releaseLock:()=>{locked=false;released++;}})},HtmlService:{createHtmlOutputFromFile:()=>({setTitle:()=> 'html'})}});
+vm.runInContext(fs.readFileSync(path.join(root,'apps-script/Code.gs'),'utf8'),context);
+const call=(name,arg)=>{context.input=arg;return vm.runInContext(name+'(input)',context);};
+const id=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
+assert.match(call('setupMatchLog'),/initialized/);
+assert.match(call('setupMatchLog'),/verified/);
+assert.equal(cells.length,1);
+assert.equal(call('loadMatchLog').events.length,0);
+const input={action:'record',eventId:id(1),decisionId:id(2),previousEventId:'',teenId:'teen-test',teenName:'Fictional Teen',mentorEmail:'mentor@example.com',mentorName:'Fictional Mentor',reason:'Shared interests and requested experience.',weights:{interests:30,lived:30,personality:25,lightning:15},possible:85,suggestions:[{name:'Fictional Mentor',email:'mentor@example.com',total:75,percent:88}]};
+assert.throws(()=>call('saveMatchEvent',{...input,reason:' '}),/reason/);
+assert.equal(cells.length,1);
+const first=call('saveMatchEvent',input);
+assert.equal(first.event.status,'Pending assignment');
+assert.equal(first.event.by,'staff@example.com');
+assert.equal(cells.length,2);
+assert.equal(call('saveMatchEvent',input).retried,true);
+assert.equal(cells.length,2);
+assert.throws(()=>call('saveMatchEvent',{...input,eventId:id(3),decisionId:id(4)}),/already has a decision/);
+const confirm={action:'confirm',eventId:id(5),decisionId:id(2),previousEventId:id(1)};
+const confirmed=call('saveMatchEvent',confirm);
+assert.equal(confirmed.event.status,'Confirmed in admin');
+assert.equal(confirmed.event.reason,input.reason);
+assert.equal(cells.length,3);
+assert.equal(call('saveMatchEvent',confirm).retried,true);
+const correction={...input,action:'correct',eventId:id(6),previousEventId:id(1),reason:'Corrected context.'};
+assert.throws(()=>call('saveMatchEvent',correction),/Someone updated/);
+correction.previousEventId=id(5);
+email='second@example.com';
+const corrected=call('saveMatchEvent',correction);
+assert.equal(corrected.event.status,'Pending assignment');
+assert.equal(corrected.event.by,'second@example.com');
+assert.equal(cells.length,4);
+assert.equal(call('loadMatchLog').events[0].reason,input.reason);
+assert.throws(()=>call('saveMatchEvent',{...correction,eventId:id(7),previousEventId:id(6),teenId:'changed-id'}),/cannot change/);
+email='intruder@example.com';
+assert.throws(()=>call('loadMatchLog'),/not authorized/);
+assert.throws(()=>call('doGet'),/not authorized/);
+assert.throws(()=>call('saveMatchEvent',input),/not authorized/);
+email='';assert.throws(()=>call('loadMatchLog'),/not authorized/);
+email='staff@example.com';
+const formula={...input,eventId:id(8),decisionId:id(9),teenId:'formula-teen',teenName:'=IMPORTXML("https://example.com", "//x")',reason:'=not a formula'};
+const saved=call('saveMatchEvent',formula);
+assert.equal(saved.event.reason,'=not a formula');
+assert.equal(call('loadMatchLog').events.at(-1).reason,'=not a formula');
+const uncertain={...input,eventId:id(10),decisionId:id(11),teenId:'retry-teen'};
+failFlush=true;assert.throws(()=>call('saveMatchEvent',uncertain),/Response lost/);
+const count=cells.length;failFlush=false;
+assert.equal(call('saveMatchEvent',uncertain).retried,true);
+assert.equal(cells.length,count);
+const before=cells.length;
+cells[0][0]='Changed header';assert.throws(()=>call('saveMatchEvent',{...input,eventId:id(12),decisionId:id(13),teenId:'another'}),/columns have changed/);assert.equal(cells.length,before);
+assert.equal(locked,false);assert.ok(released>5);
+const manifest=JSON.parse(fs.readFileSync(path.join(root,'apps-script/appsscript.json'),'utf8'));
+assert.equal(manifest.webapp.executeAs,'USER_ACCESSING');
+assert.notEqual(manifest.webapp.access,'ANYONE_ANONYMOUS');
+const generated=fs.readFileSync(path.join(root,'apps-script/Index.html'),'utf8');
+assert.match(generated,/function formMentors/);
+assert.match(generated,/decisionForm\(p\)/);
+assert.match(generated,/saveMatchEvent/);
+assert.doesNotMatch(generated,/Nothing is uploaded, sent or saved/);
+for(const match of generated.matchAll(/<script>([\s\S]*?)<\/script>/g))new vm.Script(match[1]);
+console.log('PASS: access checks; required reason; pending/confirmed states; retained corrections; stale-write rejection; repeated-click and lost-response retries; formula-text safety; header protection; lock release; authenticated deployment; generated page syntax.');
