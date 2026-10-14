@@ -22,6 +22,11 @@
   .panel { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
   .panel h2 { font-size: 19px; margin-bottom: 8px; }
   .privacy { background: var(--blue-light); border-color: var(--blue-light); font-size: 14px; }
+  .staff-entry { background: var(--yellow-light); }
+  .staff-entry p { margin: 8px 0 14px; }
+  .staff-link { display: inline-block; background: var(--blue-light); color: var(--charcoal); border: 1px solid var(--blue); border-radius: 8px; padding: 10px 16px; font-weight: 700; text-decoration: none; }
+  .staff-link:hover { text-decoration: underline; }
+  .staff-link:focus-visible { outline: 3px solid var(--charcoal); outline-offset: 3px; }
   label.file { display: inline-block; background: var(--blue); color: var(--white); font-weight: 700; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
   label.file input { display: none; }
   .filename { margin-left: 10px; color: var(--muted); }
@@ -68,6 +73,13 @@
   <p>Suggests mentors for each teen. A person on the Vescent team makes every match in the admin portal.</p>
 </header>
 <main>
+  <!-- STAFF_ENTRY_START -->
+  <section class="panel staff-entry" aria-labelledby="staffHeading">
+    <h2 id="staffHeading">Staff matching with saved history</h2>
+    <p>Use the staff tool to record decisions and view team history. Sign in with your approved Google account.</p>
+    <a class="staff-link" href="https://script.google.com/macros/s/AKfycbxVGKidQ4LNT9ZvbYpT9vilpbv79X7z4N3Qkd5NmKhTezX3f8dGo6A6O1A-ITQB4g/exec">Open staff matching tool</a>
+  </section>
+  <!-- STAFF_ENTRY_END -->
   <div class="panel privacy">
     Files you open here stay on this computer. Nothing is uploaded, sent or saved. Closing or refreshing the page clears everything.
   </div>
