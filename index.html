@@ -20,6 +20,10 @@
   .staff-link { display: inline-block; background: #D2E9ED; color: #2A2A2A; border: 1px solid #5DA4CD; border-radius: 8px; padding: 12px 18px; margin: 6px 0; font-weight: 700; text-decoration: none; }
   .staff-link:hover { text-decoration: underline; }
   .staff-link:focus-visible { outline: 3px solid #2A2A2A; outline-offset: 3px; }
+  label { display: block; font-weight: 700; margin-top: 16px; }
+  input { display: block; width: 100%; max-width: 420px; padding: 10px 12px; margin: 6px 0 12px; border: 1px solid #5DA4CD; border-radius: 6px; font: inherit; background: #FFFFFF; }
+  input:focus-visible { outline: 3px solid #2A2A2A; outline-offset: 3px; }
+  button.staff-link { font: inherit; font-weight: 700; cursor: pointer; }
   .note { font-size: 14px; }
 </style>
 </head>
@@ -31,8 +35,14 @@
 <main>
   <section aria-labelledby="staffHeading">
     <h2 id="staffHeading">Start matching</h2>
-    <p>Open the staff tool below. On the next screen, sign in with your approved Google account, then load the teen and mentor answer files.</p>
-    <a class="staff-link" href="https://script.google.com/macros/s/AKfycbxVGKidQ4LNT9ZvbYpT9vilpbv79X7z4N3Qkd5NmKhTezX3f8dGo6A6O1A-ITQB4g/exec">Open staff matching tool</a>
+    <p>Enter the Google account you use for Vescent matching. This opens the tool with that account selected, even when you have other Google accounts signed in.</p>
+    <form method="get" action="https://script.google.com/macros/s/AKfycbxVGKidQ4LNT9ZvbYpT9vilpbv79X7z4N3Qkd5NmKhTezX3f8dGo6A6O1A-ITQB4g/exec">
+      <label for="staffEmail">Your approved Google account</label>
+      <input id="staffEmail" name="authuser" type="email" autocomplete="email" spellcheck="false" autocapitalize="none" aria-describedby="accountHelp" required>
+      <p id="accountHelp" class="note">Use the email approved for the matching tool. Your Chrome profile name may be different from the Google account used by the tool.</p>
+      <button class="staff-link" type="submit">Open staff matching tool</button>
+    </form>
+    <p class="note">If Google asks for permission, check the email shown before continuing. If it keeps asking after approval, try a private browser window signed in only to your approved account.</p>
     <p>The staff tool provides match suggestions and saves your decisions and team history.</p>
     <p class="note">Make the actual assignment in the admin portal, then confirm it in the staff tool.</p>
   </section>
