@@ -4,18 +4,26 @@ Suggests mentors for teens waiting to be matched in the Vescent app. A person on
 
 ## Privacy
 
-The tool runs entirely in your browser. Files you open are read on your own computer and are never uploaded, sent or saved. Closing or refreshing the page clears everything.
+The public GitHub page is a starting page only. Open the staff matching tool there, then sign in and load answer files on the staff page. Answer files are read temporarily in your browser. Recording a decision saves identities, scores, reason, and status to the private team Google Sheet; the tool does not assign anyone in the admin portal.
 
 Never add real teen or mentor files to this repo. The repo is set to refuse data files other than the made-up test files.
 
 ## Try it with test data
 
-1. Open the tool.
-2. Choose `test-data/test-teens-export.csv` as the teen file.
+1. Open the GitHub page, enter your approved Google account email, click **Open staff matching tool**, and sign in with that account.
+2. On the staff page, choose `test-data/test-teens-export.csv` as the teen file.
 3. Choose `test-data/test-mentors.csv` as the mentor file.
 4. Compare the results with `test-data/expected-results.md`.
 
 Every person in the test files is made up.
+
+## Sign-in account selection
+
+The public entry form sends the entered email to Google as the `authuser` account selector. It does not save the email in the page or grant access. The staff tool still checks the exact email allowlist and spreadsheet permissions.
+
+On October 20, Cindy completed consent for `cindy@vescent.co`, but the account-neutral tool URL kept returning to the Google authorization page after another signed-in account had been selected earlier. Opening the same deployment with `?authuser=cindy%40vescent.co` loaded the tool and confirmed history for Cindy without another consent grant. This verified account routing as the cause of her loop; it does not establish why Google requested fresh consent initially, or verify any other staff account.
+
+Google documents that multiple simultaneous Google accounts can cause Apps Script access problems: https://developers.google.com/apps-script/guides/support/troubleshooting#issues_with_multiple_google_accounts. If account selection still fails, use a private browser window signed in only to the approved account. Do not change the deployment to run as its owner or remove staff access checks to work around sign-in issues.
 
 ## Mentor form responses
 
@@ -31,4 +39,4 @@ With Node.js available, run `node tests/mentor-form.test.cjs`. Checks use only f
 
 ## Private staff match history
 
-`apps-script/` provides a Google-hosted version of this tool with automatically saved match-decision history in a private team Google Sheet. The public page continues to process answer files temporarily without saving them. See `apps-script/README.md` for setup, workflow, and validation status.
+`apps-script/` provides a Google-hosted version of this tool with automatically saved match-decision history in a private team Google Sheet. The public page directs staff to this version; file loading and matching take place on the staff page. Its source interface and scoring are in `apps-script/matching.html`. See `apps-script/README.md` for setup, workflow, and validation status.
