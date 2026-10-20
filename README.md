@@ -10,12 +10,20 @@ Never add real teen or mentor files to this repo. The repo is set to refuse data
 
 ## Try it with test data
 
-1. Open the GitHub page, click **Open staff matching tool**, and sign in with your approved Google account.
+1. Open the GitHub page, enter your approved Google account email, click **Open staff matching tool**, and sign in with that account.
 2. On the staff page, choose `test-data/test-teens-export.csv` as the teen file.
 3. Choose `test-data/test-mentors.csv` as the mentor file.
 4. Compare the results with `test-data/expected-results.md`.
 
 Every person in the test files is made up.
+
+## Sign-in account selection
+
+The public entry form sends the entered email to Google as the `authuser` account selector. It does not save the email in the page or grant access. The staff tool still checks the exact email allowlist and spreadsheet permissions.
+
+On October 20, Cindy completed consent for `cindy@vescent.co`, but the account-neutral tool URL kept returning to the Google authorization page after another signed-in account had been selected earlier. Opening the same deployment with `?authuser=cindy%40vescent.co` loaded the tool and confirmed history for Cindy without another consent grant. This verified account routing as the cause of her loop; it does not establish why Google requested fresh consent initially, or verify any other staff account.
+
+Google documents that multiple simultaneous Google accounts can cause Apps Script access problems: https://developers.google.com/apps-script/guides/support/troubleshooting#issues_with_multiple_google_accounts. If account selection still fails, use a private browser window signed in only to the approved account. Do not change the deployment to run as its owner or remove staff access checks to work around sign-in issues.
 
 ## Mentor form responses
 
