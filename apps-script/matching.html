@@ -167,6 +167,18 @@ function responseTime(value) {
     ? d.getTime() : null;
 }
 
+// Both mentor sources use the same reworded personality questions and answer directions.
+function mentorPersonality(rec) {
+  const normalized = {};
+  for (const [wording] of Object.values(PERSONALITY).flat()) {
+    let answer = rec[FORM_PERSONALITY[wording] || wording];
+    if (wording === "After a long day at school, what sounds better?" && answer === "Chilling alone") answer = "Chilling alone or with a few close friends";
+    if (wording === "When you're stressed, what helps more?" && answer === "Taking space and processing it alone") answer = "Taking space to process on your own";
+    normalized[wording] = answer;
+  }
+  return normalized;
+}
+
 function formMentors(records, notices) {
   const groups = new Map();
   records.forEach((rec, i) => {
@@ -200,12 +212,7 @@ function formMentors(records, notices) {
       mentorBio: rec["Tell teens who you are"], mentorHelp: rec["I'm here to help with"],
       livedOther: rec["Any other experience you'd like to add?"],
     };
-    for (const [wording] of Object.values(PERSONALITY).flat()) {
-      let answer = rec[FORM_PERSONALITY[wording] || wording];
-      if (wording === "After a long day at school, what sounds better?" && answer === "Chilling alone") answer = "Chilling alone or with a few close friends";
-      if (wording === "When you're stressed, what helps more?" && answer === "Taking space and processing it alone") answer = "Taking space to process on your own";
-      normalized[wording] = answer;
-    }
+    Object.assign(normalized, mentorPersonality(rec));
     normalized.lightningAnswers = Array.from({ length: 8 }, (_, i) => rec["Lightning round " + (i + 1) + " of 8"]);
     selected.push(normalized);
   }
@@ -369,6 +376,25 @@ function readPeople(text, role = "teen") {
       "The mentor form columns have changed or are missing. Check the response sheet before relying on results. Missing: " + missing.join("; ")]] };
     notices.push(["info", "Mentor form loaded. Lightning answers are checked against all eight question positions before scoring."]);
     const people = formMentors(records, notices).map(rec => personWithLightning(rec, notices));
+    return { people, notices };
+  }
+  // The app's mentor export retains mentor wording; adapt it to the existing scorer.
+  const mentorVersion = "2026-11-mentor-v1";
+  if (records.some(rec => rec.survey_version === mentorVersion)) {
+    if (role !== "mentor") return { people: [], notices: [["error", "This is a mentor answers export. Choose it under mentor answers, not teen answers."]] };
+    if (records.some(rec => rec.survey_version !== mentorVersion)) return { people: [], notices: [["error", "This mentor export mixes survey versions. Obtain a separate export for the supported mentor survey before matching."]] };
+    const required = ["first_name", "email", COL.interests, FORM_COL.lived]
+      .concat(Object.values(PERSONALITY).flat().map(([wording]) => FORM_PERSONALITY[wording] || wording));
+    const missing = required.filter(header => !headers.includes(header));
+    if (missing.length || new Set(headers).size !== headers.length) return { people: [], notices: [["error",
+      "The mentor export has missing or repeated columns. Obtain a corrected export before matching. Missing: " + missing.join("; ")]] };
+    const people = records.map(rec => personWithLightning({
+      ...rec, ...mentorPersonality(rec),
+      [COL.lived]: rec[FORM_COL.lived],
+      [COL.replyPace]: rec["When a teen messages you, how fast can you honestly reply?"],
+      mentorBio: rec["Tell teens who you are"], mentorHelp: rec["I'm here to help with"],
+      livedOther: rec["Any other experience you'd like to add?"],
+    }, notices));
     return { people, notices };
   }
   const missing = ["first_name", "survey_version", COL.interests, COL.lived]
