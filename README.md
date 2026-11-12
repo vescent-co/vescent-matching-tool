@@ -27,7 +27,9 @@ Google documents that multiple simultaneous Google accounts can cause Apps Scrip
 
 ## Mentor form responses
 
-Download the existing mentor response sheet using File > Download > CSV, then choose it as the mentor file. Admin mentor exports remain supported. The five mentor-worded personality questions map to the same scoring directions as the teen questions. Lightning answers are retained as staff context but remain unscored while the teen export lacks all eight taps. Bio, help-with answers, and other free text are also staff context, not points.
+Download the existing mentor response sheet using File > Download > CSV, then choose it as the mentor file. Admin mentor exports remain supported. The five mentor-worded personality questions map to the same scoring directions as the teen questions. Lightning answers use all eight question positions, mapped from the mentor form or the admin export's `lightning_01` through `lightning_08` columns. Bio, help-with answers, and other free text are staff context, not points.
+
+Lightning Round contributes up to 15 points: shared answers divided by eight, multiplied by its weight. Shared taps and an all-eight star appear in the results. Scoring uses all four signals only when the teen and every loaded mentor have eight recognized answers. If any are incomplete, a notice identifies the problem and all comparisons for that teen use the original three signals and the same denominator, 85 points at the agreed weights. Missing answers are never counted as mismatches. Obtain a corrected export to use Lightning Round; an old combined CSV column cannot reconstruct the missing answers. Previous match-history records retain their original score basis.
 
 For multiple form responses with the same email (ignoring surrounding spaces and letter case), the newest timestamp is used and a notice identifies the mentor and selected response. Missing or invalid emails are excluded. Duplicate groups with invalid timestamps or a tied newest timestamp are excluded with a warning rather than guessed. Timestamps follow the response sheet's month/day/year format and timezone. Different email addresses are treated as different mentors; this cannot detect email typos or aliases.
 
@@ -35,7 +37,19 @@ For multiple form responses with the same email (ignoring surrounding spaces and
 
 ## Run checks
 
-With Node.js available, run `node tests/mentor-form.test.cjs`. Checks use only fictional data and the preserved scoring answer key.
+With Node.js available, run:
+
+```bash
+node apps-script/build.cjs
+node tests/mentor-form.test.cjs
+node tests/match-log.test.cjs
+node tests/match-log-client.test.cjs
+node tests/lightning-round.test.cjs
+```
+
+Checks use only fictional data and the preserved scoring answer key. For a local visual check, open `apps-script/matching.html` directly and load `test-data/test-teens-lightning.csv` and `test-data/test-mentors-lightning.csv`. Expected rankings: All Eight Mentor, 100%; Six Shared Mentor, 96% (96.25 points); No Shared Mentor, 85%. The three other signals are identical in these fixtures; only the Lightning Round answers differ. The star belongs only to All Eight Mentor. Loading the old test CSVs still reproduces the original answer key, with an explicit missing-Lightning notice.
+
+This local check does not publish the tool or save to Google. Updating the staff tool requires review and a separate Apps Script deployment of the rebuilt `Index.html` and updated `Code.gs`. Deploy them together; the older log validator accepts only three-signal score totals. The app's corrected export must also be deployed before a fresh real admin CSV will contain all eight columns.
 
 ## Private staff match history
 

@@ -84,7 +84,10 @@ function decision_(input) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.mentorEmail)) throw new Error('A valid mentor email is required.');
   if (!input.weights || typeof input.weights !== 'object') throw new Error('Weights are required.');
   for (const key of ['interests', 'lived', 'personality', 'lightning']) d.weights[key] = number_(input.weights[key], 1000);
-  if (d.possible !== d.weights.interests + d.weights.lived + d.weights.personality) throw new Error('Points possible do not match the scoring weights.');
+  const base = d.weights.interests + d.weights.lived + d.weights.personality;
+  // Accept the original three-signal snapshots and complete four-signal snapshots.
+  // Raw answers remain in the browser; the log stores only the declared score basis.
+  if (d.possible !== base && d.possible !== base + d.weights.lightning) throw new Error('Points possible do not match the scoring weights.');
   if (!Array.isArray(input.suggestions) || !input.suggestions.length || input.suggestions.length > 100) throw new Error('Suggested mentors are required.');
   d.suggestions = input.suggestions.map(m => ({name: text_(m.name, 'Suggested mentor name', 200), email: text_(m.email, 'Suggested mentor email', 254).toLowerCase(), total: number_(m.total, d.possible), percent: number_(m.percent, 100)}));
   if (!d.suggestions.some(m => m.email === d.mentorEmail)) throw new Error('The selected mentor must be included in the recorded score snapshot.');
