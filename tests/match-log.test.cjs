@@ -63,6 +63,18 @@ failFlush=true;assert.throws(()=>call('saveMatchEvent',uncertain),/Response lost
 const count=cells.length;failFlush=false;
 assert.equal(call('saveMatchEvent',uncertain).retried,true);
 assert.equal(cells.length,count);
+// New four-signal decisions save out of 100 without rewriting old 85-point history.
+const complete={...input,eventId:id(14),decisionId:id(15),teenId:'complete-lightning-teen',possible:100,
+ suggestions:[{name:'Fictional Mentor',email:'mentor@example.com',total:90,percent:90}]};
+assert.throws(()=>call('saveMatchEvent',{...complete,possible:99}),/Points possible/);
+const completeSaved=call('saveMatchEvent',complete);
+assert.equal(completeSaved.event.possible,100);
+assert.equal(call('saveMatchEvent',complete).retried,true);
+const completeConfirmed=call('saveMatchEvent',{action:'confirm',eventId:id(16),decisionId:id(15),previousEventId:id(14)});
+assert.equal(completeConfirmed.event.possible,100);
+assert.equal(completeConfirmed.event.suggestions[0].total,90);
+assert.equal(call('loadMatchLog').events[0].possible,85);
+assert.equal(call('decision_',{...complete,weights:{...complete.weights,lightning:30},possible:115}).possible,115);
 const before=cells.length;
 cells[0][0]='Changed header';assert.throws(()=>call('saveMatchEvent',{...input,eventId:id(12),decisionId:id(13),teenId:'another'}),/columns have changed/);assert.equal(cells.length,before);
 assert.equal(locked,false);assert.ok(released>5);
@@ -75,4 +87,4 @@ assert.match(generated,/decisionForm\(p\)/);
 assert.match(generated,/saveMatchEvent/);
 assert.doesNotMatch(generated,/Nothing is uploaded, sent or saved/);
 for(const match of generated.matchAll(/<script>([\s\S]*?)<\/script>/g))new vm.Script(match[1]);
-console.log('PASS: access checks; required reason; pending/confirmed states; retained corrections; stale-write rejection; repeated-click and lost-response retries; formula-text safety; header protection; lock release; authenticated deployment; generated page syntax.');
+console.log('PASS: access checks; required reason; pending/confirmed states; retained corrections; stale-write rejection; repeated-click and lost-response retries; formula-text safety; header protection; lock release; authenticated deployment; generated page syntax; 100-point and adjusted-weight snapshots; preserved 85-point history.');

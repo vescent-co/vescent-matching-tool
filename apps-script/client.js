@@ -83,7 +83,7 @@ function decisionForm(teen) {
       draft.pending = {
         eventId:crypto.randomUUID(), decisionId:latest ? latest.decisionId : crypto.randomUUID(), previousEventId:latest ? latest.eventId : '', action:latest ? 'correct' : 'record',
         teenId, teenName:personName(teen.rec), mentorEmail:draft.mentorEmail, mentorName:personName(selected.mentor.rec), reason:draft.reason.trim(),
-        suggestions:suggested.map(r => ({name:personName(r.mentor.rec),email:r.mentor.rec.email || '',total:r.total,percent:r.percent})), weights:{...WEIGHTS},possible:pointsPossible(),
+        suggestions:suggested.map(r => ({name:personName(r.mentor.rec),email:r.mentor.rec.email || '',total:r.total,percent:r.percent})), weights:{...WEIGHTS},possible:pointsPossible(teen),
       };
     }
     logBusy = true;

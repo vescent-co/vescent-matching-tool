@@ -115,6 +115,17 @@
 // Survey version 2026-09-v2. Each personality question: [wording, first answer, second answer].
 // The first answer points to the first letter of the pair (E, S, T, J). Rules: docs/scoring-rules.md.
 const SURVEY_VERSION = "2026-09-v2";
+// Stable export IDs and the same eight answer pairs used by the app and mentor form.
+const LIGHTNING = [
+  {"id": "lightning_01", "options": [{"id": "making_a_playlist", "label": "Making a playlist"}, {"id": "making_a_mess_in_the_kitchen", "label": "Making a mess in the kitchen"}]},
+  {"id": "lightning_02", "options": [{"id": "big_group_hangout", "label": "Big group hangout"}, {"id": "one_close_friend", "label": "One close friend"}]},
+  {"id": "lightning_03", "options": [{"id": "texting", "label": "Texting"}, {"id": "calling", "label": "Calling"}]},
+  {"id": "lightning_04", "options": [{"id": "early_bird", "label": "Early bird"}, {"id": "night_owl", "label": "Night owl"}]},
+  {"id": "lightning_05", "options": [{"id": "beach_day", "label": "Beach day"}, {"id": "mountain_trip", "label": "Mountain trip"}]},
+  {"id": "lightning_06", "options": [{"id": "rom_com", "label": "Rom-com"}, {"id": "true_crime", "label": "True crime"}]},
+  {"id": "lightning_07", "options": [{"id": "stick_to_a_plan", "label": "Stick to a plan"}, {"id": "go_with_the_flow", "label": "Go with the flow"}]},
+  {"id": "lightning_08", "options": [{"id": "sweet", "label": "Sweet"}, {"id": "salty", "label": "Salty"}]}
+];
 const PERSONALITY = {"EI": [["After a long day at school, what sounds better?", "Being around lots of people", "Chilling alone or with a few close friends"], ["When you're stressed, what helps more?", "Venting to a friend or being around people", "Taking space to process on your own"], ["At a party or group hangout, you're more likely to...", "Talk to lots of different people", "Stick with one or two you know"], ["You get your energy from...", "Being with other people", "Time to yourself"], ["In a group project you'd rather...", "Talk it all out together", "Take a piece and work on it solo"]], "SN": [["When someone gives you directions, what works better?", "Step-by-step details", "The general idea - I'll figure it out"], ["You're more drawn to...", "What's real and happening now", "Ideas and what could be"], ["Learning something new, you focus on...", "The facts and how it works", "The big picture and what it means"], ["You tend to trust...", "What you can see and prove", "Your gut and your hunches"], ["You'd rather a teacher who...", "Gives clear examples to follow", "Lets you explore your own ideas"]], "TF": [["When a friend has a problem, you first...", "Help them solve it", "Make sure they feel heard"], ["Making a tough choice, you go with...", "What makes the most sense", "What feels right"], ["You'd rather be seen as...", "Fair", "Kind"], ["When someone's upset with you, you first want to...", "Understand what's fair", "Fix how they're feeling"], ["A good decision is one that's...", "Logical", "True to your heart"]], "JP": [["Your weekend is better when...", "You have a plan", "You keep it open"], ["With homework, you...", "Start early and go steady", "Do it when the pressure hits"], ["You feel better when things are...", "Decided and settled", "Open to change"], ["Your room or backpack is usually...", "Pretty organized", "A bit of controlled chaos"], ["Plans changing last minute feels...", "Kind of stressful", "Kind of exciting"]]};
 
 const COL = {
@@ -210,8 +221,50 @@ const AGREED_WEIGHTS = { interests: 30, lived: 30, personality: 25, lightning: 1
 let WEIGHTS = { ...AGREED_WEIGHTS };
 const WEIGHT_LABELS = { interests: "Interests", lived: "Lived experiences", personality: "Personality", lightning: "Lightning round" };
 
-// The lightning round can't be scored until the export keeps all 8 taps, so its weight is left out of the points possible.
-function pointsPossible() { return WEIGHTS.interests + WEIGHTS.lived + WEIGHTS.personality; }
+function hasCompleteLightning(person) {
+  return person?.lightning?.answers?.length === 8 && person.lightning.problems.length === 0;
+}
+
+// All mentors compared for one teen use the same signals and denominator.
+// Legacy/incomplete files keep the existing three-signal calculation with a visible warning.
+function usesLightning(teen) {
+  return hasCompleteLightning(teen) && mentors.length > 0 && mentors.every(hasCompleteLightning);
+}
+
+function pointsPossible(teen) {
+  return WEIGHTS.interests + WEIGHTS.lived + WEIGHTS.personality
+    + (usesLightning(teen) ? WEIGHTS.lightning : 0);
+}
+
+function personWithLightning(rec, notices) {
+  const raw = Array.isArray(rec.lightningAnswers)
+    ? rec.lightningAnswers : LIGHTNING.map(question => rec[question.id]);
+  const answers = LIGHTNING.map((question, index) => {
+    const value = typeof raw[index] === "string" ? raw[index].trim() : "";
+    return question.options.find(option => option.id === value || option.label === value)?.label ?? null;
+  });
+  const problems = LIGHTNING.filter((question, index) => answers[index] === null).map(q => q.id);
+  if (problems.length) {
+    const name = [rec.first_name, rec.last_name].filter(Boolean).join(" ") || rec.username || "This person";
+    notices.push(["error", name + ": Lightning round answers are missing or unrecognized ("
+      + problems.join(", ") + "). Check the saved responses and obtain a corrected export. Missing answers are not treated as mismatches."]);
+  }
+  return { rec, ...personalityType(rec), lightning: { answers, problems } };
+}
+
+function lightningScore(teen, mentor) {
+  if (!hasCompleteLightning(teen) || !hasCompleteLightning(mentor)) return null;
+  const shared = teen.lightning.answers.filter((answer, index) => answer === mentor.lightning.answers[index]);
+  return { shared, points: shared.length / 8 * WEIGHTS.lightning };
+}
+
+function lightningText(score) {
+  if (!score) return "Lightning round: not scored. Corrected answers are needed; only the other three signals are used.";
+  const count = score.shared.length === 8 ? "⭐ All 8 the same" : score.shared.length + " of 8 the same";
+  return "Lightning round: " + count
+    + (score.shared.length ? " (" + score.shared.join(", ") + ")" : "")
+    + " · " + formatPoints(score.points) + " of " + WEIGHTS.lightning;
+}
 const PAIR_NAMES = { EI: "energy", SN: "how you take things in", TF: "how you decide", JP: "how you live" };
 
 // Personality: each shared letter 25, each different letter 10 (40 to 100), then scaled to the weight.
@@ -314,8 +367,8 @@ function readPeople(text, role = "teen") {
     const missing = required.filter(h => !headers.includes(h));
     if (missing.length || new Set(headers).size !== headers.length) return { people: [], notices: [["error",
       "The mentor form columns have changed or are missing. Check the response sheet before relying on results. Missing: " + missing.join("; ")]] };
-    notices.push(["info", "Mentor form loaded. Lightning answers are retained but not scored while the teen export lacks all eight taps."]);
-    const people = formMentors(records, notices).map(rec => ({ rec, ...personalityType(rec) }));
+    notices.push(["info", "Mentor form loaded. Lightning answers are checked against all eight question positions before scoring."]);
+    const people = formMentors(records, notices).map(rec => personWithLightning(rec, notices));
     return { people, notices };
   }
   const missing = ["first_name", "survey_version", COL.interests, COL.lived]
@@ -324,15 +377,19 @@ function readPeople(text, role = "teen") {
   if (missing.length) {
     notices.push(["error", "This file is missing columns the tool needs, so it may not be an answers export from the admin portal. Missing: " + missing.slice(0, 3).join("; ") + (missing.length > 3 ? " and " + (missing.length - 3) + " more." : ".")]);
   }
-  const lightningColumns = headers.filter(h => h === COL.lightning).length;
-  if (lightningColumns < 8) {
-    notices.push(["info", "Lightning round: not available in this export. The export keeps " + lightningColumns + " of the 8 taps, so the lightning round is left out of the scores."]);
+  const repeatedLightning = LIGHTNING.filter(question => headers.filter(h => h === question.id).length > 1);
+  if (repeatedLightning.length) {
+    return { people: [], notices: [["error", "Repeated Lightning round columns are ambiguous: "
+      + repeatedLightning.map(q => q.id).join(", ") + ". Obtain a corrected export before matching."]] };
+  }
+  if (LIGHTNING.some(question => !headers.includes(question.id))) {
+    notices.push(["info", "Lightning round: not available in this export. Obtain a new export containing lightning_01 through lightning_08 after the app export fix is deployed. The old combined column cannot recover the eight answers; Lightning round is left out of these scores."]);
   }
   const versions = [...new Set(records.map(r => r.survey_version).filter(Boolean))];
   if (versions.some(v => v !== SURVEY_VERSION)) {
     notices.push(["error", "Survey version " + versions.join(", ") + " is different from the version this tool was built for (" + SURVEY_VERSION + "). The questions may have changed. Check with the team before relying on these results."]);
   }
-  const people = records.map(rec => ({ rec, ...personalityType(rec) }));
+  const people = records.map(rec => personWithLightning(rec, notices));
   return { people, notices };
 }
 
@@ -372,6 +429,7 @@ function renderTeen(p) {
     el("dt", {}, "Growth goals"), listOrNone(picks(r[COL.goals]), "None picked"),
     el("dt", {}, "Other goals"), textOrNone(r[COL.goalsOther], "None"),
     el("dt", {}, "Reply pace"), textOrNone(r[COL.replyPace], "No answer"),
+    el("dt", {}, "Lightning answers"), textOrNone(p.lightning?.answers.map((answer, i) => (i + 1) + ": " + (answer || "Missing or unrecognized")).join("; "), "Not available in this export"),
     el("dt", {}, "Note to our team"), textOrNone(r[COL.note], "None"),
   );
   card.append(dl);
@@ -382,13 +440,16 @@ function renderTeen(p) {
 // Every mentor's scores for one teen, best match first. Ties keep the same score and are listed alphabetically.
 // Match = total points ÷ points possible × 100, as a whole number (decided October 5, 2026).
 function scoreMentors(teen) {
+  const includeLightning = usesLightning(teen);
+  const possible = pointsPossible(teen);
   const rows = mentors.map(m => {
     const personality = personalityScore(teen.type, m.type);
     const lived = overlapScore(teen.rec[COL.lived], m.rec[COL.lived], WEIGHTS.lived);
     const interests = overlapScore(teen.rec[COL.interests], m.rec[COL.interests], WEIGHTS.interests);
-    const total = (personality ? personality.points : 0) + lived.points + interests.points;
-    const possible = pointsPossible();
-    return { mentor: m, personality, lived, interests, total, percent: possible ? Math.round(total / possible * 100) : 0 };
+    const lightning = includeLightning ? lightningScore(teen, m) : null;
+    const total = (personality ? personality.points : 0) + lived.points + interests.points
+      + (lightning ? lightning.points : 0);
+    return { mentor: m, personality, lived, interests, lightning, total, percent: possible ? Math.round(total / possible * 100) : 0 };
   });
   return rows.sort((a, b) => b.total - a.total || (a.mentor.rec.first_name || "").localeCompare(b.mentor.rec.first_name || ""));
 }
@@ -412,6 +473,12 @@ function overlapText(score, weight, label) {
 function renderTopMatches(teen) {
   const rows = scoreMentors(teen);
   const box = el("div", { class: "score-box" }, el("h3", { class: "score-title" }, "Suggested mentors"));
+  if (!usesLightning(teen)) {
+    box.append(el("p", { class: "warn" }, "Lightning round is not scored for this teen's comparisons: "
+      + (!hasCompleteLightning(teen) ? "her eight answers are incomplete or invalid. " : "one or more loaded mentors has incomplete or invalid answers. ")
+      + "Obtain corrected answer files. All mentors below use only the other three signals ("
+      + formatPoints(pointsPossible(teen)) + " points possible), so missing answers do not count as mismatches."));
+  }
   topMatches(rows).forEach((row, i) => {
     const m = row.mentor;
     const name = ((m.rec.first_name || "") + " " + (m.rec.last_name || "")).trim() || m.rec.username;
@@ -427,6 +494,7 @@ function renderTopMatches(teen) {
         el("li", {}, personalityText),
         el("li", {}, overlapText(row.lived, WEIGHTS.lived, "Lived experiences")),
         el("li", {}, overlapText(row.interests, WEIGHTS.interests, "Interests")),
+        el("li", {}, lightningText(row.lightning)),
         el("li", { class: "info" }, "Reply pace (not scored): " + (m.rec[COL.replyPace] || "No answer")))));
   });
   const all = el("details", { class: "all-mentors" }, el("summary", {}, "Show all " + rows.length + " mentors"), renderScores(teen));
@@ -437,7 +505,7 @@ function renderTopMatches(teen) {
 // Every mentor's scores for one teen.
 function renderScores(teen) {
   const table = el("table", { class: "scores" },
-    el("tr", {}, el("th", {}, "Mentor"), el("th", {}, "Match"), el("th", {}, "Type"), el("th", {}, "Personality"), el("th", {}, "Lived experiences"), el("th", {}, "Interests")));
+    el("tr", {}, el("th", {}, "Mentor"), el("th", {}, "Match"), el("th", {}, "Type"), el("th", {}, "Personality"), el("th", {}, "Lived experiences"), el("th", {}, "Interests"), el("th", {}, "Lightning round")));
   for (const row of scoreMentors(teen)) {
     const m = row.mentor;
     const cell = row.personality
@@ -445,7 +513,8 @@ function renderScores(teen) {
       : el("td", { class: "none" }, "Can't score: answers incomplete");
     table.append(el("tr", {}, el("td", {}, m.rec.first_name || m.rec.username), el("td", { class: "match" }, row.percent + "%"),
       el("td", {}, m.type || "?"), cell,
-      overlapCell(row.lived, WEIGHTS.lived, "Lived experiences"), overlapCell(row.interests, WEIGHTS.interests, "Interests")));
+      overlapCell(row.lived, WEIGHTS.lived, "Lived experiences"), overlapCell(row.interests, WEIGHTS.interests, "Interests"),
+      el("td", {}, lightningText(row.lightning))));
   }
   return el("div", { class: "table-wrap" }, table);
 }
@@ -469,7 +538,7 @@ function renderMentor(p) {
     el("dt", {}, "Other lived experiences (not scored)"), textOrNone(r.livedOther, "None"),
     el("dt", {}, "Bio (not scored)"), textOrNone(r.mentorBio, "No answer in this file"),
     el("dt", {}, "I'm here to help with (not scored)"), textOrNone(r.mentorHelp, "No answer in this file"),
-    el("dt", {}, "Lightning answers (not scored)"), textOrNone(r.lightningAnswers ? r.lightningAnswers.map((answer, i) => (i + 1) + ": " + (answer || "No answer")).join("; ") : "Not available in this export", "Not available in this export"),
+    el("dt", {}, "Lightning answers"), textOrNone(p.lightning?.answers.map((answer, i) => (i + 1) + ": " + (answer || "Missing or unrecognized")).join("; "), "Not available in this export"),
   ));
   return card;
 }
@@ -490,7 +559,7 @@ function renderWeights() {
       renderTeens();
     });
     const label = el("label", { class: "weight" }, el("span", {}, WEIGHT_LABELS[key]), input);
-    if (key === "lightning") label.append(el("small", {}, "Not available in this export"));
+    if (key === "lightning") label.append(el("small", {}, "Used when the teen and every loaded mentor have all 8 valid answers"));
     box.append(label);
   }
   weightNotices();

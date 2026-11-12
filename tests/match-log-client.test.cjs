@@ -47,5 +47,32 @@ const descendants=(node, predicate)=>[...(predicate(node)?[node]:[]),...node.chi
  const reload=vm.runInContext('refreshMatchLog()',ctx);calls.shift().failure(new Error('No access'));await reload;
  assert.match(nodes.get('logStatus').textContent,/Recording is unavailable/);
  assert.match(nodes.get('teenList').textContent,/Load the private history/);
- console.log('PASS: UI requires reason; shows unconfirmed failures; preserves draft; retries same ID; shows saved status; confirms only after checkbox; warns on unresolved drafts; blocks recording when history cannot load.');
+ // Complete new-format exports must record the same denominator shown in matching.
+ vm.runInContext(`(() => {
+   const teenRecord={...parseCSV(teenCSV).records[0], user_id:'fictional-lightning-teen'};
+   const mentorRecord=parseCSV(mentorCSV).records[0];
+   LIGHTNING.forEach((question,index)=>{teenRecord[question.id]=mentorRecord['Lightning round '+(index+1)+' of 8'];});
+   const headers=Object.keys(teenRecord);
+   const encode=value=>'"'+String(value ?? '').replaceAll('"','""')+'"';
+   const updatedCSV=[headers.map(encode).join(','),headers.map(h=>encode(teenRecord[h])).join(',')].join('\\n');
+   teens=readPeople(updatedCSV).people;
+   mentors=readPeople(mentorCSV,'mentor').people;
+   logReady=true;
+   renderTeens();
+ })()`,ctx);
+ form=descendants(nodes.get('teenList'),e=>e.attrs.class==='decision-form')[0];
+ const fullSelect=descendants(form,e=>e.tag==='select')[0];
+ fullSelect.value='testmentor@example.com';fullSelect.handlers.change();
+ const fullReason=descendants(form,e=>e.tag==='textarea')[0];
+ fullReason.value='Fictional full Lightning Round match.';fullReason.handlers.input();
+ const fullButton=descendants(form,e=>e.tag==='button'&&e.textContent==='Record decision')[0];
+ const fullSave=fullButton.handlers.click();
+ const fullRequest=calls.shift();
+ assert.equal(fullRequest.data.possible,100);
+ assert.equal(fullRequest.data.suggestions[0].percent,Math.round(fullRequest.data.suggestions[0].total));
+ fullRequest.success({saved:true,event:{...fullRequest.data,at:'2026-11-11T20:00:00.000Z',by:'staff@example.com',status:'Pending assignment'}});
+ await fullSave;
+ assert.match(nodes.get('historyRows').textContent,/\/100\)/);
+ assert.match(nodes.get('historyRows').textContent,/\/85\)/);
+ console.log('PASS: UI requires reason; shows unconfirmed failures; preserves draft; retries same ID; shows saved status; confirms only after checkbox; warns on unresolved drafts; blocks recording when history cannot load; complete Lightning Round snapshots save out of 100 while old history stays out of 85.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
